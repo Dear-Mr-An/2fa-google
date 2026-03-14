@@ -10,7 +10,7 @@
     <div class="container">
         <h1>2FA Authenticator</h1>
         <div class="input-group">
-            <input type="text" id="secretKey" placeholder="Enter Secret Key">
+            <input type="text" id="secretKey" placeholder="Enter Secret Key" oninput="onInputChange()">
             <button onclick="addToken()">Add</button>
         </div>
         <div id="tokenList"></div>

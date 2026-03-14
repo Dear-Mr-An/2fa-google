@@ -1,5 +1,6 @@
 let tokens = JSON.parse(localStorage.getItem('tokens') || '[]');
 let intervals = [];
+let liveSecret = '';
 
 function base32Decode(base32) {
     const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
@@ -17,27 +18,31 @@ function base32Decode(base32) {
 }
 
 function generateTOTP(secret) {
-    const key = base32Decode(secret);
-    const epoch = Math.floor(Date.now() / 1000);
-    const time = Math.floor(epoch / 30);
-    const data = new Uint8Array(8);
-    for (let i = 7; i >= 0; i--) {
-        data[i] = time & 0xff;
-        time >>= 8;
+    try {
+        const key = base32Decode(secret);
+        const epoch = Math.floor(Date.now() / 1000);
+        const time = Math.floor(epoch / 30);
+        const data = new Uint8Array(8);
+        for (let i = 7; i >= 0; i--) {
+            data[i] = time & 0xff;
+            time >>= 8;
+        }
+
+        const shaObj = new jsSHA("SHA-1", "UINT8ARRAY");
+        shaObj.setHMACKey(key, "UINT8ARRAY");
+        shaObj.update(data);
+        const hmac = shaObj.getHMAC("UINT8ARRAY");
+
+        const offset = hmac[hmac.length - 1] & 0xf;
+        const code = ((hmac[offset] & 0x7f) << 24) |
+                     ((hmac[offset + 1] & 0xff) << 16) |
+                     ((hmac[offset + 2] & 0xff) << 8) |
+                     (hmac[offset + 3] & 0xff);
+
+        return (code % 1000000).toString().padStart(6, '0');
+    } catch {
+        return '------';
     }
-
-    const shaObj = new jsSHA("SHA-1", "UINT8ARRAY");
-    shaObj.setHMACKey(key, "UINT8ARRAY");
-    shaObj.update(data);
-    const hmac = shaObj.getHMAC("UINT8ARRAY");
-
-    const offset = hmac[hmac.length - 1] & 0xf;
-    const code = ((hmac[offset] & 0x7f) << 24) |
-                 ((hmac[offset + 1] & 0xff) << 16) |
-                 ((hmac[offset + 2] & 0xff) << 8) |
-                 (hmac[offset + 3] & 0xff);
-
-    return (code % 1000000).toString().padStart(6, '0');
 }
 
 function addToken() {
@@ -47,6 +52,12 @@ function addToken() {
     tokens.push(secret);
     localStorage.setItem('tokens', JSON.stringify(tokens));
     document.getElementById('secretKey').value = '';
+    liveSecret = '';
+    renderTokens();
+}
+
+function onInputChange() {
+    liveSecret = document.getElementById('secretKey').value.trim().replace(/\s/g, '');
     renderTokens();
 }
 
@@ -60,9 +71,11 @@ function renderTokens() {
     intervals.forEach(clearInterval);
     intervals = [];
     const list = document.getElementById('tokenList');
-    list.innerHTML = tokens.map(secret => `
+    const allTokens = liveSecret && !tokens.includes(liveSecret) ? [liveSecret, ...tokens] : tokens;
+
+    list.innerHTML = allTokens.map((secret, idx) => `
         <div class="token-item">
-            <button class="delete-btn" onclick="deleteToken('${secret}')">Delete</button>
+            ${idx === 0 && liveSecret && !tokens.includes(liveSecret) ? '' : `<button class="delete-btn" onclick="deleteToken('${secret}')">Delete</button>`}
             <div class="token-code" id="code-${secret}">------</div>
             <div class="token-timer" id="timer-${secret}">30s</div>
             <div class="progress-bar"><div class="progress-fill" id="progress-${secret}"></div></div>
@@ -70,7 +83,7 @@ function renderTokens() {
         </div>
     `).join('');
 
-    tokens.forEach(secret => {
+    allTokens.forEach(secret => {
         const update = () => {
             const code = generateTOTP(secret);
             const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
@@ -81,6 +94,16 @@ function renderTokens() {
         update();
         intervals.push(setInterval(update, 1000));
     });
+}
+
+const urlParams = new URLSearchParams(window.location.search);
+const urlKey = urlParams.get('key');
+if (urlKey) {
+    const cleanKey = urlKey.trim().replace(/\s/g, '');
+    if (!tokens.includes(cleanKey)) {
+        tokens.push(cleanKey);
+        localStorage.setItem('tokens', JSON.stringify(tokens));
+    }
 }
 
 renderTokens();
