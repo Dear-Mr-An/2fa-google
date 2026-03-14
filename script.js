@@ -1,0 +1,86 @@
+let tokens = JSON.parse(localStorage.getItem('tokens') || '[]');
+let intervals = [];
+
+function base32Decode(base32) {
+    const alphabet = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
+    let bits = '';
+    for (let i = 0; i < base32.length; i++) {
+        const val = alphabet.indexOf(base32.charAt(i).toUpperCase());
+        if (val === -1) continue;
+        bits += val.toString(2).padStart(5, '0');
+    }
+    const bytes = [];
+    for (let i = 0; i + 8 <= bits.length; i += 8) {
+        bytes.push(parseInt(bits.substr(i, 8), 2));
+    }
+    return new Uint8Array(bytes);
+}
+
+function generateTOTP(secret) {
+    const key = base32Decode(secret);
+    const epoch = Math.floor(Date.now() / 1000);
+    const time = Math.floor(epoch / 30);
+    const data = new Uint8Array(8);
+    for (let i = 7; i >= 0; i--) {
+        data[i] = time & 0xff;
+        time >>= 8;
+    }
+
+    const shaObj = new jsSHA("SHA-1", "UINT8ARRAY");
+    shaObj.setHMACKey(key, "UINT8ARRAY");
+    shaObj.update(data);
+    const hmac = shaObj.getHMAC("UINT8ARRAY");
+
+    const offset = hmac[hmac.length - 1] & 0xf;
+    const code = ((hmac[offset] & 0x7f) << 24) |
+                 ((hmac[offset + 1] & 0xff) << 16) |
+                 ((hmac[offset + 2] & 0xff) << 8) |
+                 (hmac[offset + 3] & 0xff);
+
+    return (code % 1000000).toString().padStart(6, '0');
+}
+
+function addToken() {
+    const secret = document.getElementById('secretKey').value.trim().replace(/\s/g, '');
+    if (!secret) return alert('Please enter a secret key');
+    if (tokens.includes(secret)) return alert('This key already exists');
+    tokens.push(secret);
+    localStorage.setItem('tokens', JSON.stringify(tokens));
+    document.getElementById('secretKey').value = '';
+    renderTokens();
+}
+
+function deleteToken(secret) {
+    tokens = tokens.filter(t => t !== secret);
+    localStorage.setItem('tokens', JSON.stringify(tokens));
+    renderTokens();
+}
+
+function renderTokens() {
+    intervals.forEach(clearInterval);
+    intervals = [];
+    const list = document.getElementById('tokenList');
+    list.innerHTML = tokens.map(secret => `
+        <div class="token-item">
+            <button class="delete-btn" onclick="deleteToken('${secret}')">Delete</button>
+            <div class="token-code" id="code-${secret}">------</div>
+            <div class="token-timer" id="timer-${secret}">30s</div>
+            <div class="progress-bar"><div class="progress-fill" id="progress-${secret}"></div></div>
+            <div class="token-secret">${secret}</div>
+        </div>
+    `).join('');
+
+    tokens.forEach(secret => {
+        const update = () => {
+            const code = generateTOTP(secret);
+            const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
+            document.getElementById(`code-${secret}`).textContent = code;
+            document.getElementById(`timer-${secret}`).textContent = remaining + 's';
+            document.getElementById(`progress-${secret}`).style.width = (remaining / 30 * 100) + '%';
+        };
+        update();
+        intervals.push(setInterval(update, 1000));
+    });
+}
+
+renderTokens();
