@@ -89,8 +89,8 @@ function renderTokens() {
             <div class="token-code" id="${safeId}-code" onclick="copyCode('${safeId}')">------</div>
             <div class="token-timer" id="${safeId}-timer">30s</div>
             <div class="progress-bar"><div class="progress-fill" id="${safeId}-progress"></div></div>
-            <button class="copy-btn" id="${safeId}-copy" onclick="copyCode('${safeId}')">Copy</button>
             <div class="token-secret">${secret}</div>
+            <button class="copy-btn" id="${safeId}-copy" onclick="copyCode('${safeId}')">Copy</button>
         </div>
     `}).join('');
 
