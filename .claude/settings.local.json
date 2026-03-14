@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//e/Gpt注册机/**)",
+      "Bash(rm -rf 2fa/dist)",
+      "Bash(git config:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "Bash(git checkout:*)"
+    ]
+  }
+}
