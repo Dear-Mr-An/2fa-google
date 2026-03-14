@@ -12,22 +12,52 @@ body {
     justify-content: center;
     align-items: center;
     padding: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+body::before {
+    content: '';
+    position: absolute;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    top: -250px;
+    right: -250px;
+    border-radius: 50%;
+}
+
+body::after {
+    content: '';
+    position: absolute;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.08) 0%, transparent 70%);
+    bottom: -200px;
+    left: -200px;
+    border-radius: 50%;
 }
 
 .container {
-    background: white;
-    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
     padding: 40px;
     max-width: 500px;
     width: 100%;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    position: relative;
+    z-index: 1;
 }
 
 h1 {
     text-align: center;
-    color: #333;
+    color: white;
     margin-bottom: 30px;
     font-size: 28px;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 }
 
 .input-group {
@@ -39,65 +69,82 @@ h1 {
 input {
     flex: 1;
     padding: 12px 16px;
-    border: 2px solid #e0e0e0;
-    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
     font-size: 16px;
-    transition: border-color 0.3s;
+    color: white;
+    transition: all 0.3s;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
 }
 
 input:focus {
     outline: none;
-    border-color: #667eea;
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.1);
 }
 
 button {
     padding: 12px 24px;
-    background: #667eea;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
     color: white;
-    border: none;
-    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 12px;
     font-size: 16px;
     cursor: pointer;
-    transition: background 0.3s;
+    transition: all 0.3s;
 }
 
 button:hover {
-    background: #5568d3;
+    background: rgba(255, 255, 255, 0.3);
+    box-shadow: 0 4px 20px rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
 }
 
 .token-item {
-    background: #f8f9fa;
-    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 16px;
     padding: 20px;
     margin-bottom: 15px;
     position: relative;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
 }
 
 .token-code {
     font-size: 36px;
     font-weight: bold;
-    color: #667eea;
+    color: white;
     text-align: center;
     letter-spacing: 8px;
     margin: 10px 0;
     cursor: pointer;
     user-select: none;
-    transition: color 0.3s;
+    transition: all 0.3s;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
 }
 
 .token-code:hover {
-    color: #5568d3;
+    transform: scale(1.05);
+    text-shadow: 0 4px 20px rgba(255, 255, 255, 0.3);
 }
 
 .token-timer {
     text-align: center;
-    color: #666;
+    color: rgba(255, 255, 255, 0.8);
     font-size: 14px;
 }
 
 .progress-bar {
     height: 4px;
-    background: #e0e0e0;
+    background: rgba(255, 255, 255, 0.2);
     border-radius: 2px;
     margin-top: 10px;
     overflow: hidden;
@@ -105,26 +152,30 @@ button:hover {
 
 .progress-fill {
     height: 100%;
-    background: #667eea;
+    background: rgba(255, 255, 255, 0.6);
     transition: width 1s linear;
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
 }
 
 .delete-btn {
     position: absolute;
     top: 10px;
     right: 10px;
-    background: #ff4757;
+    background: rgba(255, 71, 87, 0.8);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     padding: 6px 12px;
     font-size: 14px;
 }
 
 .delete-btn:hover {
-    background: #ee5a6f;
+    background: rgba(255, 71, 87, 1);
+    transform: translateY(-2px);
 }
 
 .token-secret {
     font-size: 12px;
-    color: #999;
+    color: rgba(255, 255, 255, 0.6);
     text-align: center;
     margin-top: 5px;
     word-break: break-all;
@@ -134,10 +185,13 @@ button:hover {
     width: 100%;
     margin-top: 10px;
     padding: 10px;
-    background: #667eea;
-    transition: background 0.3s;
+    background: rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    transition: all 0.3s;
 }
 
 .copy-btn:hover {
-    background: #5568d3;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
 }
