@@ -89,6 +89,7 @@ function renderTokens() {
             <div class="token-code" id="${safeId}-code" onclick="copyCode('${safeId}')">------</div>
             <div class="token-timer" id="${safeId}-timer">30s</div>
             <div class="progress-bar"><div class="progress-fill" id="${safeId}-progress"></div></div>
+            <button class="copy-btn" id="${safeId}-copy" onclick="copyCode('${safeId}')">Copy</button>
             <div class="token-secret">${secret}</div>
         </div>
     `}).join('');
@@ -109,10 +110,17 @@ function renderTokens() {
 
 function copyCode(safeId) {
     const el = document.getElementById(`${safeId}-code`);
+    const btn = document.getElementById(`${safeId}-copy`);
     const code = el.textContent;
     navigator.clipboard.writeText(code).then(() => {
         el.style.color = '#4caf50';
-        setTimeout(() => el.style.color = '#667eea', 300);
+        btn.textContent = 'Copied!';
+        btn.style.background = '#4caf50';
+        setTimeout(() => {
+            el.style.color = '#667eea';
+            btn.textContent = 'Copy';
+            btn.style.background = '#667eea';
+        }, 1000);
     });
 }
 
