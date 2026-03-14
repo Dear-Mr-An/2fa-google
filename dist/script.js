@@ -74,33 +74,36 @@ function renderTokens() {
     const list = document.getElementById('tokenList');
     const allTokens = liveSecret && !tokens.includes(liveSecret) ? [liveSecret, ...tokens] : tokens;
 
-    list.innerHTML = allTokens.map((secret, idx) => `
-        <div class="token-item">
+    list.innerHTML = allTokens.map((secret, idx) => {
+        const safeId = 'token-' + idx;
+        return `
+        <div class="token-item" data-secret="${secret}">
             ${idx === 0 && liveSecret && !tokens.includes(liveSecret) ? '' : `<button class="delete-btn" onclick="deleteToken('${secret}')">Delete</button>`}
-            <div class="token-code" id="code-${secret}" onclick="copyCode('${secret}')">------</div>
-            <div class="token-timer" id="timer-${secret}">30s</div>
-            <div class="progress-bar"><div class="progress-fill" id="progress-${secret}"></div></div>
+            <div class="token-code" id="${safeId}-code" onclick="copyCode('${safeId}')">------</div>
+            <div class="token-timer" id="${safeId}-timer">30s</div>
+            <div class="progress-bar"><div class="progress-fill" id="${safeId}-progress"></div></div>
             <div class="token-secret">${secret}</div>
         </div>
-    `).join('');
+    `}).join('');
 
-    allTokens.forEach(secret => {
+    allTokens.forEach((secret, idx) => {
+        const safeId = 'token-' + idx;
         const update = () => {
             const code = generateTOTP(secret);
             const remaining = 30 - (Math.floor(Date.now() / 1000) % 30);
-            document.getElementById(`code-${secret}`).textContent = code;
-            document.getElementById(`timer-${secret}`).textContent = remaining + 's';
-            document.getElementById(`progress-${secret}`).style.width = (remaining / 30 * 100) + '%';
+            document.getElementById(`${safeId}-code`).textContent = code;
+            document.getElementById(`${safeId}-timer`).textContent = remaining + 's';
+            document.getElementById(`${safeId}-progress`).style.width = (remaining / 30 * 100) + '%';
         };
         update();
         intervals.push(setInterval(update, 1000));
     });
 }
 
-function copyCode(secret) {
-    const code = generateTOTP(secret);
+function copyCode(safeId) {
+    const el = document.getElementById(`${safeId}-code`);
+    const code = el.textContent;
     navigator.clipboard.writeText(code).then(() => {
-        const el = document.getElementById(`code-${secret}`);
         el.style.color = '#4caf50';
         setTimeout(() => el.style.color = '#667eea', 300);
     });
