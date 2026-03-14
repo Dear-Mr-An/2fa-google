@@ -20,9 +20,13 @@ function base32Decode(base32) {
 
 function generateTOTP(secret) {
     try {
+        console.log('原始密钥:', secret);
         const key = base32Decode(secret);
+        console.log('解码后长度:', key.length);
+        if (key.length === 0) return '------';
+
         const epoch = Math.floor(Date.now() / 1000);
-        const time = Math.floor(epoch / 30);
+        let time = Math.floor(epoch / 30);
         const data = new Uint8Array(8);
         for (let i = 7; i >= 0; i--) {
             data[i] = time & 0xff;
@@ -40,8 +44,11 @@ function generateTOTP(secret) {
                      ((hmac[offset + 2] & 0xff) << 8) |
                      (hmac[offset + 3] & 0xff);
 
-        return (code % 1000000).toString().padStart(6, '0');
-    } catch {
+        const result = (code % 1000000).toString().padStart(6, '0');
+        console.log('生成验证码:', result);
+        return result;
+    } catch (e) {
+        console.error('生成失败:', e);
         return '------';
     }
 }
