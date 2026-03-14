@@ -1,7 +1,10 @@
 {
   "permissions": {
     "allow": [
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(npx wrangler:*)",
+      "Bash(python:*)",
+      "Bash(start:*)"
     ]
   }
 }
